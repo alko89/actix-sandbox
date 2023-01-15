@@ -3,14 +3,13 @@ use std::{
 };
 
 use actix_web::{web, App, HttpServer, middleware::Logger, HttpResponse, http::StatusCode, ResponseError};
-use env_logger::Env;
 use mongodb::{bson::doc, Client};
 use serde::Serialize;
 use serde_json::{json, to_string_pretty};
 
 mod config;
 use config::constants::{STARTUP_TIME};
-use config::env::*;
+use config::environment::ENV;
 
 mod app;
 use app::controller::{hello};
@@ -44,9 +43,7 @@ async fn main() -> std::io::Result<()> {
     // force the lazy static to be initialized
     once_cell::sync::Lazy::force(&STARTUP_TIME);
 
-    env_logger::init_from_env(Env::default().default_filter_or("info"));
-
-    let uri = &*MONGODB_URI;
+    let uri = &ENV.mongodb_uri;
 
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
     create_username_index(&client).await;

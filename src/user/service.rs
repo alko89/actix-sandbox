@@ -1,6 +1,7 @@
 use mongodb::{bson::doc, options::IndexOptions, Client, IndexModel};
 
-use crate::config::env::MONGODB_DATABASE;
+use crate::config::environment::ENV;
+
 use crate::user::constants::COLL_NAME;
 use crate::user::model::User;
 
@@ -12,7 +13,7 @@ pub async fn create_username_index(client: &Client) {
       .options(options)
       .build();
   client
-      .database(&*MONGODB_DATABASE)
+      .database(&ENV.mongodb_database)
       .collection::<User>(COLL_NAME)
       .create_index(model, None)
       .await
