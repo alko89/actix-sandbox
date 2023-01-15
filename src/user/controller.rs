@@ -3,12 +3,11 @@ use mongodb::{bson::doc, Client, Collection};
 
 use crate::config::env::{MONGODB_DATABASE};
 
+use crate::user::constants::COLL_NAME;
 use crate::user::model::User;
 
-const COLL_NAME: &str = "users";
-
 /// Adds a new user to the "users" collection in the database.
-#[post("/user")]
+#[post("/")]
 async fn add_user(client: web::Data<Client>, body: web::Json<User>) -> HttpResponse {
     let collection = client.database(&*MONGODB_DATABASE).collection(COLL_NAME);
     let result = collection.insert_one(body.into_inner(), None).await;
@@ -19,7 +18,7 @@ async fn add_user(client: web::Data<Client>, body: web::Json<User>) -> HttpRespo
 }
 
 /// Gets the user with the supplied username.
-#[get("/user/{username}")]
+#[get("/{username}")]
 async fn get_user(client: web::Data<Client>, username: web::Path<String>) -> HttpResponse {
     let username = username.into_inner();
     let collection: Collection<User> = client.database(&*MONGODB_DATABASE).collection(COLL_NAME);

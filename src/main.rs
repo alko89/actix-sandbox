@@ -4,7 +4,7 @@ use std::{
 
 use actix_web::{web, App, HttpServer, middleware::Logger, HttpResponse, http::StatusCode, ResponseError};
 use env_logger::Env;
-use mongodb::{bson::doc, options::IndexOptions, Client, IndexModel};
+use mongodb::{bson::doc, Client};
 use serde::Serialize;
 use serde_json::{json, to_string_pretty};
 
@@ -16,11 +16,8 @@ mod app;
 use app::controller::{hello};
 
 mod user;
-use user::model::User;
+use user::service::{create_username_index};
 use user::controller::{add_user, get_user};
-
-const DB_NAME: &str = "myApp";
-const COLL_NAME: &str = "users";
 
 #[derive(Debug, Serialize)]
 struct Error {
@@ -42,23 +39,9 @@ impl ResponseError for Error {
     }
 }
 
-/// Creates an index on the "username" field to force the values to be unique.
-async fn create_username_index(client: &Client) {
-    let options = IndexOptions::builder().unique(true).build();
-    let model = IndexModel::builder()
-        .keys(doc! { "username": 1 })
-        .options(options)
-        .build();
-    client
-        .database(DB_NAME)
-        .collection::<User>(COLL_NAME)
-        .create_index(model, None)
-        .await
-        .expect("creating an index should succeed");
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // force the lazy static to be initialized
     once_cell::sync::Lazy::force(&STARTUP_TIME);
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
@@ -73,8 +56,10 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .app_data(web::Data::new(client.clone()))
             .service(hello)
-            .service(add_user)
-            .service(get_user)
+            .service(web::scope("/user")
+                .service(add_user)
+                .service(get_user)
+            )
     })
     .bind(("127.0.0.1", 8080))?
     .run()
