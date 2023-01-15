@@ -1,5 +1,3 @@
-//! Example code for using MongoDB with Actix.
-
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},
 };
@@ -9,6 +7,9 @@ use env_logger::Env;
 use mongodb::{bson::doc, options::IndexOptions, Client, IndexModel};
 use serde::Serialize;
 use serde_json::{json, to_string_pretty};
+
+mod app;
+use app::controller::{hello};
 
 mod user;
 use user::model::User;
@@ -65,6 +66,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .app_data(web::Data::new(client.clone()))
+            .service(hello)
             .service(add_user)
             .service(get_user)
     })

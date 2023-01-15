@@ -1,7 +1,7 @@
 use actix_web::{get, post, web, HttpResponse};
 use mongodb::{bson::doc, Client, Collection};
 
-use super::model::User;
+use crate::user::model::User;
 
 const DB_NAME: &str = "myApp";
 const COLL_NAME: &str = "users";
