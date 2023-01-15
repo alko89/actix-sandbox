@@ -8,6 +8,9 @@ use mongodb::{bson::doc, options::IndexOptions, Client, IndexModel};
 use serde::Serialize;
 use serde_json::{json, to_string_pretty};
 
+mod config;
+use config::constants::{STARTUP_TIME};
+
 mod app;
 use app::controller::{hello};
 
@@ -55,6 +58,8 @@ async fn create_username_index(client: &Client) {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    once_cell::sync::Lazy::force(&STARTUP_TIME);
+
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());

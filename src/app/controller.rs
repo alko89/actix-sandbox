@@ -1,6 +1,7 @@
 use actix_web::{get, HttpResponse, Responder};
-use once_cell::sync::Lazy;
 use serde::{Serialize};
+
+use crate::config::constants::{STARTUP_TIME};
 
 #[derive(Serialize)]
 pub struct Hello {
@@ -9,13 +10,10 @@ pub struct Hello {
     pub version: String,
 }
 
-const STARTUP_TIME: Lazy<std::time::SystemTime> = Lazy::new(|| std::time::SystemTime::now());
-
 #[get("/")]
 async fn hello() -> impl Responder {
-  let startup_time = *STARTUP_TIME;
   let uptime = std::time::SystemTime::now()
-      .duration_since(startup_time)
+      .duration_since(*STARTUP_TIME)
       .unwrap()
       .as_secs();
   let hello = Hello {
