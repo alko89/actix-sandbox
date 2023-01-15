@@ -10,6 +10,7 @@ use serde_json::{json, to_string_pretty};
 
 mod config;
 use config::constants::{STARTUP_TIME};
+use config::env::*;
 
 mod app;
 use app::controller::{hello};
@@ -62,7 +63,7 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    let uri = &*MONGODB_URI;
 
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
     create_username_index(&client).await;
