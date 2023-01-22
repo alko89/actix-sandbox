@@ -1,11 +1,5 @@
-use std::{
-    fmt::{Display, Formatter, Result as FmtResult},
-};
-
-use actix_web::{web, App, HttpServer, middleware::Logger, HttpResponse, http::StatusCode, ResponseError};
-use mongodb::{bson::doc, Client};
-use serde::Serialize;
-use serde_json::{json, to_string_pretty};
+use actix_web::{web, App, HttpServer, middleware::Logger};
+use mongodb::Client;
 
 mod config;
 use config::constants::{STARTUP_TIME};
@@ -17,26 +11,6 @@ use app::controller::{hello};
 mod user;
 use user::service::{create_username_index};
 use user::controller::{add_user, get_user};
-
-#[derive(Debug, Serialize)]
-struct Error {
-    msg: String,
-    status: u16,
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", to_string_pretty(self).unwrap())
-    }
-}
-
-impl ResponseError for Error {
-    // builds the actual response to send back when an error occurs
-    fn error_response(&self) -> HttpResponse {
-        let err_json = json!({ "error": self.msg });
-        HttpResponse::build(StatusCode::from_u16(self.status).unwrap()).json(err_json)
-    }
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

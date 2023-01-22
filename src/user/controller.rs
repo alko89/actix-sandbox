@@ -2,6 +2,7 @@ use actix_web::{get, post, web, HttpResponse};
 use mongodb::{bson::doc, Client, Collection};
 
 use crate::config::environment::ENV;
+use crate::config::error::Error;
 
 use crate::user::constants::COLL_NAME;
 use crate::user::model::User;
@@ -28,8 +29,14 @@ async fn get_user(client: web::Data<Client>, username: web::Path<String>) -> Htt
     {
         Ok(Some(user)) => HttpResponse::Ok().json(user),
         Ok(None) => {
-            HttpResponse::NotFound().json(format!("No user found with username {username}"))
+            HttpResponse::NotFound().json(Error {
+                msg: format!("No user found with username {username}"),
+                status: 404,
+            })
         }
-        Err(err) => HttpResponse::InternalServerError().json(err.to_string()),
+        Err(err) => HttpResponse::InternalServerError().json(Error {
+            msg: err.to_string(),
+            status: 500,
+        }),
     }
 }
